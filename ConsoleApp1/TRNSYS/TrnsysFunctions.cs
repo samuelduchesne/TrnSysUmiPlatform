@@ -3,13 +3,12 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using DistrictEnergy;
 using System.IO;
 using System.Diagnostics;
 
-namespace DistrictEnergy
+namespace TrnsysUmiPlatform
 {
-    class RunTrnsys
+    public class RunTrnsys
     {
         public RunTrnsys(TrnsysModel trnsys_model)
         {
@@ -42,7 +41,7 @@ namespace DistrictEnergy
         }
     }
 
-    class WriteDckFile
+    public class WriteDckFile
     {
         public WriteDckFile(TrnsysModel trnsys_model)
         {
@@ -58,13 +57,11 @@ namespace DistrictEnergy
                 ControlCards controlcards = new ControlCards(0, 8760, trnsys_model.HourlyTimestep);
                 file.WriteLine(controlcards.WriteControlCards());
 
-                
-                // Write Weather
-                Type15 weather = new Type15(trnsys_model.WeatherFile);
-                file.WriteLine(weather.WriteType());
-
                 Type15_3 weather2 = new Type15_3(trnsys_model.WeatherFile);
                 file.WriteLine(weather2.WriteType());
+
+                Type741 pump = new Type741(0, 0, 0, 0);
+                file.WriteLine(pump.WriteType());
 
                 // Write Type31
                 Type31 pipe = new Type31(new int[,] { { 0, 0 }, { 0, 0 }, { weather2.Unit_number, 2 } }, 0.5, 525, 3, 998, 4.31, 10);

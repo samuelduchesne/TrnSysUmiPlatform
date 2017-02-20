@@ -4,9 +4,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace DistrictEnergy
+namespace TrnsysUmiPlatform
 { 
-    class TrnsysModel
+    public class TrnsysModel
     {
         public TrnsysModel()
         {

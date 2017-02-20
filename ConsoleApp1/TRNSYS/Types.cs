@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace DistrictEnergy
+namespace TrnsysUmiPlatform
 {
     class TrnSysType
     {
@@ -122,7 +122,7 @@ namespace DistrictEnergy
                                     "0.7\t\t! 5 Ground reflectance -snow cover\n" +
                                     "1\t\t! 6 Number of surfaces\n" +
                                     "1\t\t! 7 Tracking mode\n" +
-                                    "0.0\t\t! 8 Slope of surface" +
+                                    "0.0\t\t! 8 Slope of surface\n" +
                                     "0\t\t! 9 Azimut of surface\n";
         }
     }
@@ -185,39 +185,23 @@ namespace DistrictEnergy
         /// <param name="fluid_density">The density of the fluid in the pipe/duct.</param>
         /// <param name="fluid_specific_heat">The specific heat of the fluid in the pipe/duct.</param>
         /// <param name="intitial_fluid_temperature">The temperature of the fluid in the pipe at the beginning of the simulation.</param>
-        public Type31(int[,] inputs, double inside_diameter, double pipe_lenght, double loss_coefficient, double fluid_density, double fluid_specific_heat, double intitial_fluid_temperature):base("Type 31", "31", 6, 3, "")
+        public Type31(int[,] inputs, double inside_diameter, double pipe_length, double loss_coefficient, double fluid_density, double fluid_specific_heat, double initial_fluid_temperature):base("Type 31", "31", 6, 3, "")
         { 
-            Inputs = inputs;
-            Inside_Diameter = inside_diameter;
-            Pipe_Length = pipe_lenght;
-            Loss_Coefficient = loss_coefficient;
-            Fluid_Density = fluid_density;
-            Fluid_Specific_Heat = fluid_specific_heat;
-            Initial_Fluid_Temperature = intitial_fluid_temperature;
 
-            this.Parameter_string = Inside_Diameter.ToString() + "\t\t! 1 Inside diameter\n" +
-                                    Pipe_Length.ToString() + "\t\t! 2 Pipe length\n" +
-                                    Loss_Coefficient.ToString() + "\t\t! 3 Loss coefficient\n" +
-                                    Fluid_Density.ToString() + "\t\t! 4 Fluid density\n" +
-                                    Fluid_Specific_Heat.ToString() + "\t\t! 5 Fluid specific heat\n" +
-                                    Initial_Fluid_Temperature.ToString() + "\t\t! 6 Initial fluid temperature\n";
+            this.Parameter_string = inside_diameter.ToString() + "\t\t! 1 Inside diameter\n" +
+                                    pipe_length.ToString() + "\t\t! 2 Pipe length\n" +
+                                    loss_coefficient.ToString() + "\t\t! 3 Loss coefficient\n" +
+                                    fluid_density.ToString() + "\t\t! 4 Fluid density\n" +
+                                    fluid_specific_heat.ToString() + "\t\t! 5 Fluid specific heat\n" +
+                                    initial_fluid_temperature.ToString() + "\t\t! 6 Initial fluid temperature\n";
 
-            this.Inputs_string = Inputs[0,0].ToString() + "," + Inputs[0, 1].ToString()  + "\t\t! Inlet temperature\n" +
-                                 Inputs[1,0].ToString() + "," + Inputs[1, 1].ToString() + "\t\t! Inlet flow rate\n" +
-                                 Inputs[2,0].ToString() + "," + Inputs[2, 1].ToString() + "\t\t! Environment temperature\n";
+            this.Inputs_string = inputs[0,0].ToString() + "," + inputs[0, 1].ToString()  + "\t\t! Inlet temperature\n" +
+                                 inputs[1,0].ToString() + "," + inputs[1, 1].ToString() + "\t\t! Inlet flow rate\n" +
+                                 inputs[2,0].ToString() + "," + inputs[2, 1].ToString() + "\t\t! Environment temperature\n";
 
-            this.Initial_inputs = new double[] {Initial_Fluid_Temperature,100,10};
+            this.Initial_inputs = new double[] {initial_fluid_temperature,100,10};
 
         }
-
-        public int[,] Inputs { get; private set; }
-        public double Inside_Diameter { get; private set; }
-        public double Loss_Coefficient { get; private set; }
-        public double Fluid_Density { get; private set; }
-        public double Fluid_Specific_Heat { get; private set; }
-        public double Initial_Fluid_Temperature { get; private set; }
-
-        public double Pipe_Length = 100;
     }
     class Type11 : TrnSysType
     {
@@ -243,6 +227,28 @@ namespace DistrictEnergy
             this.Parameter_string = rated_capacity.ToString() + "\t\t! 1 Rated Capacity" + "CpFluid\t\t! 2 Specific Heat of Fluid\n";
             this.Inputs_string = "";
             this.Initial_inputs = new double[] { 20.0, 10000.0, 1, 50.0, 0.0, 1.0, 20.0 };
+        }
+    }
+
+    class Type741 : TrnSysType
+
+    {
+        /// <summary>
+        /// Type741 models a variable speed pump that is able to produce any mass flowrate between zero and its
+        /// rated flowrate.
+        /// </summary>
+        /// <param name="rated_flowrate">The maximum (rated) flowrate of fluid through the pump.</param>
+        /// <param name="fluid_specific_heat">The specific heat of the fluid flowing through the device.</param>
+        /// <param name="fluid_density">The density of the fluid flowing through the device.</param>
+        /// <param name="motor_heatloss_fraction">The fraction of the motor heat loss transferred to the fluid stream.</param>
+        public Type741(double rated_flowrate, double fluid_specific_heat, double fluid_density, double motor_heatloss_fraction) :base("Variable-Speed Pump", "741", 4, 6, "")
+        {
+            this.Parameter_string = rated_flowrate.ToString() + "\t\t! 1 Rated Flowrate\n" + 
+                                    fluid_specific_heat.ToString() + "\t\t! 2 Fluid Specific Heat\n" + 
+                                    fluid_density + "\t\t! 3 Fluid Density\n" + 
+                                    motor_heatloss_fraction.ToString() + "\t\t! 4 Motor Heat Loss Fraction\n";
+            this.Inputs_string = "";
+            this.Initial_inputs = new double[] { 20.0, 0.0, 1.0, 0.6, 0.9, 10.0 };
         }
     }
     //#########################################################################################################
@@ -287,7 +293,7 @@ namespace DistrictEnergy
             // The value to be returned
             string value;
             {
-                value = "*******************************************************************************\n*** Control cards\n*******************************************************************************\n* START, STOP and STEP\nCONSTANTS 3\nSTART=" + Start.ToString() + "\nSTOP=" + Stop.ToString() + "\nSTEP=" + Data_step.ToString() + "\nSIMULATION \t START\t STOP\t STEP\t! Start time\tEnd time\tTime step\nTOLERANCES 0.001 0.001\t\t\t! Integration\t Convergence\nLIMITS 50 1000 30\t\t\t\t! Max iterations\tMax warnings\tTrace limit\nDFQ 1\t\t\t\t\t! TRNSYS numerical integration solver method\nWIDTH 80\t\t\t\t! TRNSYS output file width, number of characters\nLIST \t\t\t\t\t! NOLIST statement\n\t\t\t\t\t! MAP statement\nSOLVER 0 1 1\t\t\t\t! Solver statement\tMinimum relaxation factor\tMaximum relaxation factor\nNAN_CHECK 0\t\t\t\t! Nan DEBUG statement\nOVERWRITE_CHECK 0\t\t\t! Overwrite DEBUG statement\nTIME_REPORT 0\t\t\t! disable time report\nEQSOLVER 0\t\t\t\t! EQUATION SOLVER statement\n";
+                value = "*******************************************************************************\n*** Control cards\n*******************************************************************************\n* START, STOP and STEP\nCONSTANTS 3\nSTART=" + Start.ToString() + "\nSTOP=" + Stop.ToString() + "\nSTEP=" + Data_step.ToString() + "\nSIMULATION \t START\t STOP\t STEP\t! Start time\tEnd time\tTime step\nTOLERANCES 0.001 0.001\t\t\t! Integration\t Convergence\nLIMITS 50 1000 30\t\t\t\t! Max iterations\tMax warnings\tTrace limit\nDFQ 1\t\t\t\t\t! TRNSYS numerical integration solver method\nWIDTH 80\t\t\t\t! TRNSYS output file width, number of characters\nLIST \t\t\t\t\t! NOLIST statement\n\t\t\t\t\t\t! MAP statement\nSOLVER 0 1 1\t\t\t! Solver statement\tMinimum relaxation factor\tMaximum relaxation factor\nNAN_CHECK 0\t\t\t\t! Nan DEBUG statement\nOVERWRITE_CHECK 0\t\t! Overwrite DEBUG statement\nTIME_REPORT 0\t\t\t! disable time report\nEQSOLVER 0\t\t\t\t! EQUATION SOLVER statement\n";
             }
             return value;
         }
